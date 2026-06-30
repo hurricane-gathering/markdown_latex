@@ -1,258 +1,96 @@
-# elegant_markdown
+# markdown_latex
 
-[![pub package](https://img.shields.io/pub/v/elegant_markdown.svg)](https://pub.dev/packages/elegant_markdown)
-[![pub points](https://img.shields.io/pub/points/elegant_markdown)](https://pub.dev/packages/elegant_markdown/score)
-[![likes](https://img.shields.io/pub/likes/elegant_markdown)](https://pub.dev/packages/elegant_markdown/score)
+[![pub package](https://img.shields.io/pub/v/markdown_latex.svg)](https://pub.dev/packages/markdown_latex)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-A high-quality Flutter component for rendering **Markdown + LaTeX** simultaneously.  
-Styled after Notion / GitHub — clean, readable, and fully customizable.
+**Flutter Markdown + LaTeX 混合渲染组件** — 一眼即知：同时渲染 Markdown 与 LaTeX 数学公式。  
+视觉风格接近 Notion / GitHub，支持 GFM、代码高亮、编辑/预览双模式。
 
 ---
 
 ## ✨ Features
 
-| Feature | Description |
-|---------|-------------|
-| 📝 **Full Markdown** | GFM — headings, bold/italic/strikethrough, lists, blockquotes, HR |
-| 💻 **Code Highlighting** | Syntax highlighting via `flutter_highlight` with copy button |
-| 🔢 **LaTeX Math** | Inline `$...$`, display `$$...$$`, multi-line `$$` blocks via `flutter_math_fork` |
-| ☑️ **Task Lists** | `- [x]` / `- [ ]` rendered as checkboxes |
-| 📊 **Tables** | GFM tables with border + padding |
-| 🖼️ **Images** | Network images with loading/error placeholders |
-| 🔗 **Links** | Opens with `url_launcher`, custom handler supported |
-| 🌗 **Themes** | Built-in Light & Dark, follows system brightness automatically |
-| ✂️ **Selectable** | Optional text selection |
+| Feature                  | Description                                            |
+| ------------------------ | ------------------------------------------------------ |
+| 🔀 **混合渲染**          | Markdown 正文与 `$...$` / `$$...$$` LaTeX 公式无缝混排 |
+| 📝 **Full Markdown**     | GFM — 标题、粗斜体、列表、引用、表格、任务列表         |
+| 💻 **Code Highlighting** | `flutter_highlight` 语法高亮 + 一键复制                |
+| ✏️ **Edit / Preview**    | `MarkdownLatexEditor` 编辑/渲染切换 + 文本可选开关     |
+| 🌗 **Themes**            | 内置 Light / Dark，可完全自定义                        |
+| ✂️ **Selectable**        | 预览模式可选中文本                                     |
 
 ---
 
 ## 📦 Installation
 
-Add to your `pubspec.yaml`:
-
 ```yaml
 dependencies:
-  elegant_markdown: ^0.1.0
+  markdown_latex: ^0.1.0
+  provider: ^6.1.5 # MarkdownLatexEditor 需要
 ```
-
-Then run:
 
 ```bash
 flutter pub get
 ```
+
+**Requirements:** Flutter `>=3.32.0`, Dart `>=3.8.0`
 
 ---
 
 ## 🚀 Quick Start
 
 ```dart
-import 'package:elegant_markdown/elegant_markdown.dart';
+import 'package:markdown_latex/markdown_latex.dart';
 
-// Minimal usage — auto-follows system theme
-ElegantMarkdown(
-  data: '# Hello\n\nThis is **bold** and $E=mc^2$.',
-)
-
-// Full API
-ElegantMarkdown(
-  data: markdownText,
-  theme: ElegantMarkdownTheme.light(),   // or .dark()
-  onTapLink: (url) => launchUrl(Uri.parse(url)),
+MarkdownLatex(
+  data: '# Hello\n\n质能方程：\$E=mc^2\$',
+  theme: MarkdownLatexTheme.light(),
   selectable: true,
-  maxWidth: 800,
-  padding: const EdgeInsets.all(16),
 )
 ```
 
----
-
-## 🧩 API Reference
-
-### `ElegantMarkdown`
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `data` | `String` | required | Markdown source text |
-| `theme` | `ElegantMarkdownTheme?` | auto | Theme config; auto-detects system brightness if null |
-| `onTapLink` | `ValueChanged<String>?` | opens URL | Called when a link is tapped |
-| `selectable` | `bool` | `false` | Enable text selection |
-| `padding` | `EdgeInsetsGeometry` | zero | Outer padding |
-| `maxWidth` | `double?` | null | Content max width (auto-centered) |
-
----
-
-### `ElegantMarkdownTheme`
+### 编辑 / 预览
 
 ```dart
-// Built-in presets
-ElegantMarkdownTheme.light()   // GitHub-inspired light theme
-ElegantMarkdownTheme.dark()    // GitHub-inspired dark theme
+final controller = MarkdownLatexEditorController(initialData: '# Hi\n\n\$x^2\$');
 
-// Custom theme
-ElegantMarkdownTheme(
-  brightness: Brightness.light,
-  background: Colors.white,
-  surface: Color(0xFFF6F8FA),
-  onSurface: Color(0xFF1F2328),
-  primary: Color(0xFF0969DA),            // links, checkboxes
-  codeBackground: Color(0xFFF6F8FA),
-  codeForeground: Color(0xFF1F2328),
-  inlineCodeColor: Color(0xFFD63384),    // inline `code` color
-  blockquoteBorder: Color(0xFFD0D7DE),
-  blockquoteBackground: Color(0xFFF6F8FA),
-  tableBorder: Color(0xFFD0D7DE),
-  tableHeaderBackground: Color(0xFFF6F8FA),
-  tableAltRowBackground: Color(0xFFFAFAFA),
-  divider: Color(0xFFD0D7DE),
-  highlightTheme: githubTheme,           // from flutter_highlight
-)
+MarkdownLatexEditor(
+  controller: controller,
+  toolbarBuilder: (context, theme) =>
+      MarkdownLatexEditorToolbar(theme: theme),
+);
 ```
 
 ---
 
-## 📐 Markdown Syntax Reference
+## 🧩 API
 
-### Text
+| Widget                          | Description     |
+| ------------------------------- | --------------- |
+| `MarkdownLatex`                 | 混合渲染主组件  |
+| `MarkdownLatexTheme`            | 主题配置        |
+| `MarkdownLatexEditor`           | 编辑/预览编辑器 |
+| `MarkdownLatexEditorController` | 编辑器状态      |
+| `MarkdownLatexEditorToolbar`    | 内置工具栏      |
+
+---
+
+## 📐 LaTeX 语法
 
 ```markdown
-# H1  ## H2  ### H3
+行内：$E = mc^2$
 
-**bold**  *italic*  ~~strikethrough~~  `inline code`
-```
+单行显示：$$\frac{a}{b}$$
 
-### Math (LaTeX)
+多行块：
 
-```markdown
-Inline: $E = mc^2$
-
-Display (single line): $$\frac{a}{b}$$
-
-Block (multi-line):
 $$
 \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
 $$
 ```
 
-### Code Blocks
-
-````markdown
-```dart
-void main() => runApp(const MyApp());
-```
-````
-
-Supported language tags: `dart`, `python`, `javascript`, `typescript`,
-`java`, `kotlin`, `swift`, `rust`, `go`, `bash`, `yaml`, `json`, `sql`, `html`, `css`, and more.
-
-### Task Lists
-
-```markdown
-- [x] Completed task
-- [ ] Pending task
-```
-
-### Tables
-
-```markdown
-| Column A | Column B |
-|----------|----------|
-| Cell 1   | Cell 2   |
-```
-
----
-
-## 🌗 Theme Usage
-
-### Explicit Theme
-
-```dart
-ElegantMarkdown(
-  data: content,
-  theme: ElegantMarkdownTheme.dark(),
-)
-```
-
-### Auto Follow System Theme
-
-Simply omit `theme` — the widget reads `Theme.of(context).brightness`:
-
-```dart
-ElegantMarkdown(data: content)
-```
-
-### Dynamic Toggle
-
-```dart
-class _MyState extends State<MyPage> {
-  bool _isDark = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElegantMarkdown(
-      data: content,
-      theme: _isDark
-          ? ElegantMarkdownTheme.dark()
-          : ElegantMarkdownTheme.light(),
-    );
-  }
-}
-```
-
----
-
-## 🔧 Scrollable Document
-
-`ElegantMarkdown` renders as a non-scrolling body (`MarkdownBody` under the hood).  
-Wrap it in a `SingleChildScrollView` for scrollable documents:
-
-```dart
-SingleChildScrollView(
-  padding: const EdgeInsets.all(16),
-  child: ElegantMarkdown(data: longDocument),
-)
-```
-
----
-
-## 🏗️ Architecture
-
-```
-elegant_markdown/
-├── lib/
-│   ├── elegant_markdown.dart        # Public API entry point
-│   └── src/
-│       ├── theme.dart               # ElegantMarkdownTheme
-│       ├── syntax/
-│       │   └── math_syntax.dart     # InlineMathSyntax + BlockMathSyntax
-│       └── builders/
-│           ├── code_builder.dart    # Code block with highlight + copy
-│           └── math_builder.dart    # LaTeX inline + block builders
-└── example/
-    └── lib/main.dart                # Runnable demo app
-```
-
-**Key design decisions:**
-
-- `BlockMathBuilder.isBlockElement() = true` — registers `blockmath` into flutter_markdown's block tag list, preventing inline-context errors.
-- Custom `InlineMathSyntax` regex matches both `$...$` and `$$...$$` (single-line display) as inline nodes.
-- Custom `BlockMathSyntax` handles multi-line `$$...$$` blocks as top-level block elements.
-- `builders['pre']` intercepts all fenced code blocks; language is read from `class="language-*"` attribute.
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and pull requests are welcome!  
-See [CONTRIBUTING.md](CONTRIBUTING.md) or open an [issue](https://github.com/fluttercommunity/elegant_markdown/issues).
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feat/awesome-feature`
-3. Commit changes: `git commit -m 'feat: add awesome feature'`
-4. Push: `git push origin feat/awesome-feature`
-5. Open a Pull Request
-
 ---
 
 ## 📄 License
 
-MIT © 2026 — See [LICENSE](LICENSE) for details.
+MIT © 2026

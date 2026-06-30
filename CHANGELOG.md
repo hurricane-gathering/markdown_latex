@@ -7,26 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - 2026-03-20
+## [0.1.0] - 2026-06-30
 
 ### Added
 
-- **Core component** `ElegantMarkdown` widget with full GFM support
-- **LaTeX math rendering** via `flutter_math_fork`
-  - Inline math: `$...$`
-  - Single-line display math: `$$...$$`
-  - Multi-line block math: fenced `$$` blocks
-- **Code syntax highlighting** via `flutter_highlight` with 20+ language themes
-  - Language label badge in code block header
-  - One-click copy button with animated feedback
-  - Horizontal scroll for long code lines
-- **`ElegantMarkdownTheme`** with built-in Light and Dark presets
-  - Auto-follows system `Brightness` when `theme` is omitted
-  - Fully customizable colors and highlight themes
-- **Task list** checkboxes (`- [x]` / `- [ ]`)
-- **Tables** with GFM border support
-- **Blockquotes** with left border and subtle background
-- **Images** with loading indicator and error placeholder
-- **Link handling** via `url_launcher` with optional custom callback
-- **Selectable text** via `selectable` parameter
-- **`maxWidth`** constraint for centered reading layouts
+- **`markdown_latex`** — 以「Markdown + LaTeX 混合渲染」命名的首发版本（原 `elegant_markdown` 重命名）
+- **`MarkdownLatex`** — GFM + 行内/块级 LaTeX 混合渲染
+- **`MarkdownLatexEditor`** — 编辑/预览双模式，可选中文本开关
+- **`MarkdownLatexTheme`** — Light / Dark 主题，代码高亮、数学公式容器样式
+- 代码块语法高亮、复制按钮、任务列表、表格、图片、链接
+- `provider` + `Selector` 状态管理

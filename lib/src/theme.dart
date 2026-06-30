@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_highlight/themes/github.dart';
 import 'package:flutter_highlight/themes/vs2015.dart';
 
-/// Configuration object that controls the visual appearance of [ElegantMarkdown].
+/// Configuration object that controls the visual appearance of [MarkdownLatex].
 ///
 /// Two built-in presets are provided:
 ///
 /// ```dart
-/// ElegantMarkdownTheme.light()  // GitHub-inspired light theme
-/// ElegantMarkdownTheme.dark()   // GitHub-inspired dark theme
+/// MarkdownLatexTheme.light()  // GitHub-inspired light theme
+/// MarkdownLatexTheme.dark()   // GitHub-inspired dark theme
 /// ```
 ///
 /// Or supply a fully custom theme:
 ///
 /// ```dart
-/// ElegantMarkdownTheme(
+/// MarkdownLatexTheme(
 ///   brightness: Brightness.light,
 ///   background: Colors.white,
 ///   primary: Colors.blue,
@@ -22,7 +22,7 @@ import 'package:flutter_highlight/themes/vs2015.dart';
 ///   // ...
 /// )
 /// ```
-class ElegantMarkdownTheme {
+class MarkdownLatexTheme {
   /// Whether this is a [Brightness.light] or [Brightness.dark] theme.
   final Brightness brightness;
 
@@ -65,18 +65,24 @@ class ElegantMarkdownTheme {
   /// Color used for horizontal rules (`---`) and other subtle dividers.
   final Color divider;
 
+  /// Background fill for display / block math containers.
+  final Color mathBackground;
+
+  /// Border color for display / block math containers.
+  final Color mathBorder;
+
   /// Syntax-highlighting theme map passed directly to `flutter_highlight`.
   ///
   /// Use any theme from `package:flutter_highlight/themes/*.dart`, e.g.
   /// `githubTheme`, `vs2015Theme`, `monokaiTheme`.
   final Map<String, TextStyle> highlightTheme;
 
-  /// Creates a custom [ElegantMarkdownTheme].
+  /// Creates a custom [MarkdownLatexTheme].
   ///
   /// All parameters are required. Prefer the factory constructors
-  /// [ElegantMarkdownTheme.light] and [ElegantMarkdownTheme.dark]
+  /// [MarkdownLatexTheme.light] and [MarkdownLatexTheme.dark]
   /// for common use cases.
-  const ElegantMarkdownTheme({
+  const MarkdownLatexTheme({
     required this.brightness,
     required this.background,
     required this.surface,
@@ -91,11 +97,13 @@ class ElegantMarkdownTheme {
     required this.tableHeaderBackground,
     required this.tableAltRowBackground,
     required this.divider,
+    required this.mathBackground,
+    required this.mathBorder,
     required this.highlightTheme,
   });
 
   /// GitHub-inspired light theme.
-  factory ElegantMarkdownTheme.light() => ElegantMarkdownTheme(
+  factory MarkdownLatexTheme.light() => MarkdownLatexTheme(
         brightness: Brightness.light,
         background: const Color(0xFFFFFFFF),
         surface: const Color(0xFFF6F8FA),
@@ -110,11 +118,13 @@ class ElegantMarkdownTheme {
         tableHeaderBackground: const Color(0xFFF6F8FA),
         tableAltRowBackground: const Color(0xFFFAFAFA),
         divider: const Color(0xFFD0D7DE),
+        mathBackground: const Color(0xFFF6F8FA),
+        mathBorder: const Color(0xFFE1E4E8),
         highlightTheme: githubTheme,
       );
 
   /// GitHub-inspired dark theme.
-  factory ElegantMarkdownTheme.dark() => ElegantMarkdownTheme(
+  factory MarkdownLatexTheme.dark() => MarkdownLatexTheme(
         brightness: Brightness.dark,
         background: const Color(0xFF0D1117),
         surface: const Color(0xFF161B22),
@@ -129,6 +139,8 @@ class ElegantMarkdownTheme {
         tableHeaderBackground: const Color(0xFF1C2128),
         tableAltRowBackground: const Color(0xFF161B22),
         divider: const Color(0xFF3D444D),
+        mathBackground: const Color(0xFF161B22),
+        mathBorder: const Color(0xFF30363D),
         highlightTheme: vs2015Theme,
       );
 

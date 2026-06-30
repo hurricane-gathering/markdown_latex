@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'elegant_markdown.dart';
+import 'markdown_latex.dart';
+import 'src/demo/demo_app_controller.dart';
 import 'src/demo_content.dart';
 
 void main() {
-  runApp(const App());
+  final controller = DemoAppController(initialMarkdown: kDemoMarkdown);
+  runApp(ChangeNotifierProvider.value(value: controller, child: const App()));
 }
 
 class App extends StatelessWidget {
@@ -12,121 +15,132 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ElegantMarkdown Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(useMaterial3: true),
-      darkTheme: ThemeData.dark(useMaterial3: true),
-      themeMode: ThemeMode.system,
-      home: const DemoPage(),
+    return Selector<DemoAppController, bool>(
+      selector: (_, c) => c.isDark,
+      builder: (context, isDark, _) {
+        return MaterialApp(
+          title: 'MarkdownLatex Demo',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData.light(useMaterial3: true),
+          darkTheme: ThemeData.dark(useMaterial3: true),
+          themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+          home: const DemoPage(),
+        );
+      },
     );
   }
 }
 
-// ─── Demo 页面 ────────────────────────────────────────────────────────────────
-
-class DemoPage extends StatefulWidget {
+class DemoPage extends StatelessWidget {
   const DemoPage({super.key});
 
   @override
-  State<DemoPage> createState() => _DemoPageState();
+  Widget build(BuildContext context) {
+    return Selector<DemoAppController, MarkdownLatexTheme>(
+      selector: (_, c) => c.markdownTheme,
+      builder: (context, theme, _) {
+        final demo = context.read<DemoAppController>();
+
+        return Scaffold(
+          backgroundColor: theme.background,
+          appBar: _DemoAppBar(theme: theme),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    child: MarkdownLatexEditor(
+                      controller: demo.editorController,
+                      theme: theme,
+                      onTapLink: (url) => debugPrint('Link tapped: $url'),
+                      toolbarBuilder: (context, t) =>
+                          MarkdownLatexEditorToolbar(theme: t),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
-class _DemoPageState extends State<DemoPage> {
-  bool _isDark = false;
+class _DemoAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final MarkdownLatexTheme theme;
 
-  ElegantMarkdownTheme get _theme =>
-      _isDark ? ElegantMarkdownTheme.dark() : ElegantMarkdownTheme.light();
+  const _DemoAppBar({required this.theme});
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 1);
 
   @override
   Widget build(BuildContext context) {
-    final t = _theme;
+    final demo = context.read<DemoAppController>();
 
-    return AnimatedTheme(
-      duration: const Duration(milliseconds: 300),
-      data: _isDark
-          ? ThemeData.dark(useMaterial3: true)
-          : ThemeData.light(useMaterial3: true),
-      child: Scaffold(
-        backgroundColor: t.background,
-        appBar: _buildAppBar(t),
-        body: _buildBody(t),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(ElegantMarkdownTheme t) {
     return AppBar(
-      backgroundColor: t.background,
+      backgroundColor: theme.background,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Divider(height: 1, color: t.divider),
+        child: Divider(height: 1, color: theme.divider),
       ),
       title: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: t.primary.withValues(alpha: 0.12),
+              color: theme.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(Icons.article_outlined, color: t.primary, size: 20),
+            child: Icon(Icons.article_outlined, color: theme.primary, size: 20),
           ),
           const SizedBox(width: 10),
           Text(
-            'ElegantMarkdown',
+            'MarkdownLatex',
             style: TextStyle(
-              color: t.onSurface,
+              color: theme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'v0.1.0',
+            style: TextStyle(
+              color: theme.onSurface.withValues(alpha: 0.4),
+              fontSize: 12,
             ),
           ),
         ],
       ),
       actions: [
-        // 主题切换
         Padding(
           padding: const EdgeInsets.only(right: 12),
-          child: _ThemeToggle(
-            isDark: _isDark,
-            theme: t,
-            onToggle: () => setState(() => _isDark = !_isDark),
+          child: Selector<DemoAppController, bool>(
+            selector: (_, c) => c.isDark,
+            builder: (context, isDark, _) {
+              return _ThemeToggle(
+                isDark: isDark,
+                theme: theme,
+                onToggle: demo.toggleTheme,
+              );
+            },
           ),
         ),
       ],
     );
   }
-
-  Widget _buildBody(ElegantMarkdownTheme t) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 820),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: ElegantMarkdown(
-              data: kDemoMarkdown,
-              theme: t,
-              selectable: true,
-              onTapLink: (url) {
-                debugPrint('Link tapped: $url');
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
-
-// ─── 主题切换按钮 ─────────────────────────────────────────────────────────────
 
 class _ThemeToggle extends StatelessWidget {
   final bool isDark;
-  final ElegantMarkdownTheme theme;
+  final MarkdownLatexTheme theme;
   final VoidCallback onToggle;
 
   const _ThemeToggle({
@@ -151,40 +165,38 @@ class _ThemeToggle extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // 图标行
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.light_mode_rounded,
-                      size: 15,
-                      color: isDark
-                          ? theme.onSurface.withValues(alpha: 0.3)
-                          : Colors.amber.shade700),
-                  Icon(Icons.dark_mode_rounded,
-                      size: 15,
-                      color: isDark
-                          ? Colors.indigo.shade300
-                          : theme.onSurface.withValues(alpha: 0.3)),
+                  Icon(
+                    Icons.light_mode_rounded,
+                    size: 15,
+                    color: isDark
+                        ? theme.onSurface.withValues(alpha: 0.3)
+                        : Colors.amber.shade700,
+                  ),
+                  Icon(
+                    Icons.dark_mode_rounded,
+                    size: 15,
+                    color: isDark
+                        ? Colors.indigo.shade300
+                        : theme.onSurface.withValues(alpha: 0.3),
+                  ),
                 ],
               ),
             ),
-            // 滑块
             AnimatedAlign(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
-              alignment: isDark
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
+              alignment: isDark ? Alignment.centerRight : Alignment.centerLeft,
               child: Container(
                 width: 28,
                 height: 28,
                 margin: const EdgeInsets.symmetric(horizontal: 3),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF3D444D)
-                      : Colors.white,
+                  color: isDark ? const Color(0xFF3D444D) : Colors.white,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(

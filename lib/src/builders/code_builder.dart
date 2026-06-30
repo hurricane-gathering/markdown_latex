@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:provider/provider.dart';
 
+import '../state/code_copy_notifier.dart';
 import '../theme.dart';
 
 /// 代码块渲染器：语法高亮 + 语言标签 + 一键复制
 ///
 /// 注册到 builders['pre'] 以拦截所有围栏代码块。
 class CodeBlockBuilder extends MarkdownElementBuilder {
-  final ElegantMarkdownTheme theme;
+  final MarkdownLatexTheme theme;
 
   CodeBlockBuilder({required this.theme});
 
   @override
   Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
-    // pre 元素的第一个子节点是 code 元素
     final codeEl = element.children?.whereType<md.Element>().firstWhere(
           (e) => e.tag == 'code',
           orElse: () => md.Element.empty('code'),
@@ -28,16 +28,17 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
         ? classAttr.substring('language-'.length)
         : '';
 
-    return _CodeBlockView(code: code, language: language, theme: theme);
+    return ChangeNotifierProvider(
+      create: (_) => CodeCopyNotifier(),
+      child: _CodeBlockView(code: code, language: language, theme: theme),
+    );
   }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-
-class _CodeBlockView extends StatefulWidget {
+class _CodeBlockView extends StatelessWidget {
   final String code;
   final String language;
-  final ElegantMarkdownTheme theme;
+  final MarkdownLatexTheme theme;
 
   const _CodeBlockView({
     required this.code,
@@ -46,28 +47,19 @@ class _CodeBlockView extends StatefulWidget {
   });
 
   @override
-  State<_CodeBlockView> createState() => _CodeBlockViewState();
-}
-
-class _CodeBlockViewState extends State<_CodeBlockView> {
-  bool _copied = false;
-
-  @override
   Widget build(BuildContext context) {
-    final t = widget.theme;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: t.codeBackground,
-        borderRadius: BorderRadius.circular(10),
+        color: theme.codeBackground,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: t.divider.withValues(alpha: 0.6),
-          width: 1,
+          color: theme.divider.withValues(alpha: 0.55),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: t.isDark ? 0.3 : 0.06),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: theme.isDark ? 0.28 : 0.05),
+            blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
@@ -75,89 +67,116 @@ class _CodeBlockViewState extends State<_CodeBlockView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildHeader(t),
-          _buildBody(t),
+          _CodeBlockHeader(code: code, language: language, theme: theme),
+          _CodeBlockBody(code: code, language: language, theme: theme),
         ],
       ),
     );
   }
+}
 
-  Widget _buildHeader(ElegantMarkdownTheme t) {
+class _CodeBlockHeader extends StatelessWidget {
+  final String code;
+  final String language;
+  final MarkdownLatexTheme theme;
+
+  const _CodeBlockHeader({
+    required this.code,
+    required this.language,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: t.isDark
+        color: theme.isDark
             ? const Color(0xFF1C2128)
             : const Color(0xFFEAECEF),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         border: Border(
-          bottom: BorderSide(color: t.divider.withValues(alpha: 0.5), width: 1),
+          bottom: BorderSide(
+            color: theme.divider.withValues(alpha: 0.45),
+          ),
         ),
       ),
       child: Row(
         children: [
-          if (widget.language.isNotEmpty)
+          if (language.isNotEmpty)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: t.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(4),
+                color: theme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                widget.language,
+                language,
                 style: TextStyle(
-                  color: t.primary,
+                  color: theme.primary,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'monospace',
+                  letterSpacing: 0.2,
                 ),
               ),
             ),
           const Spacer(),
-          _CopyButton(copied: _copied, onTap: _handleCopy, theme: t),
+          _CopyButton(code: code, theme: theme),
         ],
       ),
     );
   }
+}
 
-  Widget _buildBody(ElegantMarkdownTheme t) {
+class _CodeBlockBody extends StatelessWidget {
+  final String code;
+  final String language;
+  final MarkdownLatexTheme theme;
+
+  const _CodeBlockBody({
+    required this.code,
+    required this.language,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius:
-          const BorderRadius.vertical(bottom: Radius.circular(10)),
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.all(16),
-        child: _buildHighlight(t),
+        child: _buildHighlight(),
       ),
     );
   }
 
-  Widget _buildHighlight(ElegantMarkdownTheme t) {
-    if (widget.language.isNotEmpty) {
+  Widget _buildHighlight() {
+    if (language.isNotEmpty) {
       return HighlightView(
-        widget.code,
-        language: _resolveLanguage(widget.language),
-        theme: t.highlightTheme,
+        code,
+        language: _resolveLanguage(language),
+        theme: theme.highlightTheme,
         padding: EdgeInsets.zero,
         textStyle: const TextStyle(
           fontFamily: 'monospace',
           fontSize: 14,
-          height: 1.65,
+          height: 1.7,
         ),
       );
     }
     return Text(
-      widget.code,
+      code,
       style: TextStyle(
-        color: t.codeForeground,
+        color: theme.codeForeground,
         fontFamily: 'monospace',
         fontSize: 14,
-        height: 1.65,
+        height: 1.7,
       ),
     );
   }
 
-  /// 将常见语言别名统一为 highlight.js 支持的名称
   String _resolveLanguage(String lang) {
     const aliases = {
       'js': 'javascript',
@@ -172,62 +191,53 @@ class _CodeBlockViewState extends State<_CodeBlockView> {
     };
     return aliases[lang] ?? lang;
   }
-
-  Future<void> _handleCopy() async {
-    await Clipboard.setData(ClipboardData(text: widget.code));
-    if (!mounted) return;
-    setState(() => _copied = true);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _copied = false);
-    });
-  }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-
 class _CopyButton extends StatelessWidget {
-  final bool copied;
-  final VoidCallback onTap;
-  final ElegantMarkdownTheme theme;
+  final String code;
+  final MarkdownLatexTheme theme;
 
-  const _CopyButton({
-    required this.copied,
-    required this.onTap,
-    required this.theme,
-  });
+  const _CopyButton({required this.code, required this.theme});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        transitionBuilder: (child, anim) =>
-            ScaleTransition(scale: anim, child: child),
-        child: Row(
-          key: ValueKey(copied),
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              copied ? Icons.check_rounded : Icons.copy_rounded,
-              size: 15,
-              color: copied
-                  ? Colors.green.shade400
-                  : theme.onSurface.withValues(alpha: 0.45),
+    final notifier = context.read<CodeCopyNotifier>();
+
+    return Selector<CodeCopyNotifier, bool>(
+      selector: (_, n) => n.copied,
+      builder: (context, copied, _) {
+        return GestureDetector(
+          onTap: () => notifier.copy(code),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            transitionBuilder: (child, anim) =>
+                ScaleTransition(scale: anim, child: child),
+            child: Row(
+              key: ValueKey(copied),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  copied ? Icons.check_rounded : Icons.copy_rounded,
+                  size: 15,
+                  color: copied
+                      ? Colors.green.shade400
+                      : theme.onSurface.withValues(alpha: 0.45),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  copied ? '已复制' : '复制',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: copied
+                        ? Colors.green.shade400
+                        : theme.onSurface.withValues(alpha: 0.45),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 4),
-            Text(
-              copied ? '已复制' : '复制',
-              style: TextStyle(
-                fontSize: 12,
-                color: copied
-                    ? Colors.green.shade400
-                    : theme.onSurface.withValues(alpha: 0.45),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

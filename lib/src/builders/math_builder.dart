@@ -5,11 +5,9 @@ import 'package:markdown/markdown.dart' as md;
 
 import '../theme.dart';
 
-// ─── 行内公式渲染器 ────────────────────────────────────────────────────────────
-
 /// 处理 `inlinemath`（$...$）和 `displaymath`（$$...$$，单行）
 class InlineMathBuilder extends MarkdownElementBuilder {
-  final ElegantMarkdownTheme theme;
+  final MarkdownLatexTheme theme;
 
   InlineMathBuilder({required this.theme});
 
@@ -26,23 +24,39 @@ class InlineMathBuilder extends MarkdownElementBuilder {
       fontSize: preferredStyle?.fontSize ?? 16,
     );
 
+    final math = Math.tex(
+      latex,
+      mathStyle: isDisplay ? MathStyle.display : MathStyle.text,
+      textStyle: textStyle,
+      onErrorFallback: (err) => LatexErrorView(latex: latex, theme: theme),
+    );
+
+    if (isDisplay) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Center(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: math,
+          ),
+        ),
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 1),
-      child: Math.tex(
-        latex,
-        mathStyle: isDisplay ? MathStyle.display : MathStyle.text,
-        textStyle: textStyle,
-        onErrorFallback: (err) => _LatexErrorView(latex: latex),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Baseline(
+        baseline: (preferredStyle?.fontSize ?? 16) * 0.78,
+        baselineType: TextBaseline.alphabetic,
+        child: math,
       ),
     );
   }
 }
 
-// ─── 块级公式渲染器 ────────────────────────────────────────────────────────────
-
 /// 处理 `blockmath`（多行 $$...$$），显示为居中公式块
 class BlockMathBuilder extends MarkdownElementBuilder {
-  final ElegantMarkdownTheme theme;
+  final MarkdownLatexTheme theme;
 
   BlockMathBuilder({required this.theme});
 
@@ -60,50 +74,54 @@ class BlockMathBuilder extends MarkdownElementBuilder {
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      margin: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
       decoration: BoxDecoration(
-        color: theme.codeBackground,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.divider.withValues(alpha: 0.5)),
+        color: theme.mathBackground,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: theme.mathBorder.withValues(alpha: 0.85),
+        ),
       ),
       alignment: Alignment.center,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Math.tex(
           latex,
           mathStyle: MathStyle.display,
           textStyle: textStyle,
-          onErrorFallback: (err) => _LatexErrorView(latex: latex),
+          onErrorFallback: (err) => LatexErrorView(latex: latex, theme: theme),
         ),
       ),
     );
   }
 }
 
-// ─── LaTeX 解析失败降级展示 ───────────────────────────────────────────────────
-
-class _LatexErrorView extends StatelessWidget {
+/// LaTeX 解析失败时的降级展示。
+class LatexErrorView extends StatelessWidget {
   final String latex;
+  final MarkdownLatexTheme? theme;
 
-  const _LatexErrorView({required this.latex});
+  const LatexErrorView({super.key, required this.latex, this.theme});
 
   @override
   Widget build(BuildContext context) {
+    final errorColor = theme?.primary ?? Colors.red;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+        color: errorColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: errorColor.withValues(alpha: 0.28)),
       ),
       child: Text(
         latex,
-        style: const TextStyle(
-          color: Colors.red,
+        style: TextStyle(
+          color: errorColor.withValues(alpha: 0.9),
           fontFamily: 'monospace',
           fontSize: 13,
+          height: 1.4,
         ),
       ),
     );

@@ -1,34 +1,12 @@
-/// A high-quality Flutter Markdown + LaTeX renderer.
-///
-/// Supports GitHub-Flavored Markdown, inline and block LaTeX math formulas,
-/// syntax-highlighted code blocks, task lists, tables, images, and links —
-/// all with elegant Light / Dark theming.
-///
-/// ## Basic usage
-///
-/// ```dart
-/// import 'package:elegant_markdown/elegant_markdown.dart';
-///
-/// ElegantMarkdown(
-///   data: '# Hello\n\nThis is **bold** and $E=mc^2$.',
-///   theme: ElegantMarkdownTheme.light(),
-/// )
-/// ```
-///
-/// See [ElegantMarkdown] for the full API.
-library;
-
-export 'src/theme.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
 
-import 'src/builders/code_builder.dart';
-import 'src/builders/math_builder.dart' show BlockMathBuilder, InlineMathBuilder;
-import 'src/syntax/math_syntax.dart';
-import 'src/theme.dart';
+import 'builders/code_builder.dart';
+import 'builders/math_builder.dart' show BlockMathBuilder, InlineMathBuilder;
+import 'syntax/math_syntax.dart';
+import 'theme.dart';
 
 /// A Flutter widget that renders Markdown with LaTeX math support.
 ///
@@ -39,7 +17,7 @@ import 'src/theme.dart';
 /// ## Example
 ///
 /// ```dart
-/// ElegantMarkdown(
+/// MarkdownLatex(
 ///   data: '''
 /// # Hello World
 ///
@@ -49,22 +27,22 @@ import 'src/theme.dart';
 /// \int_0^\infty e^{-x}\,dx = 1
 /// $$
 /// ''',
-///   theme: ElegantMarkdownTheme.dark(),
+///   theme: MarkdownLatexTheme.dark(),
 ///   onTapLink: (url) => launchUrl(Uri.parse(url)),
 /// )
 /// ```
 ///
 /// ## Scrollable documents
 ///
-/// [ElegantMarkdown] renders inline (non-scrolling). Wrap in a
+/// [MarkdownLatex] renders inline (non-scrolling). Wrap in a
 /// [SingleChildScrollView] for scrollable documents:
 ///
 /// ```dart
 /// SingleChildScrollView(
-///   child: ElegantMarkdown(data: longDocument),
+///   child: MarkdownLatex(data: longDocument),
 /// )
 /// ```
-class ElegantMarkdown extends StatelessWidget {
+class MarkdownLatex extends StatelessWidget {
   /// The Markdown source text to render.
   ///
   /// Supports GitHub-Flavored Markdown (GFM) plus LaTeX math:
@@ -76,9 +54,9 @@ class ElegantMarkdown extends StatelessWidget {
   /// Visual theme for the rendered output.
   ///
   /// When `null`, the theme is auto-detected from [Theme.of(context).brightness]:
-  /// - [Brightness.light] → [ElegantMarkdownTheme.light]
-  /// - [Brightness.dark]  → [ElegantMarkdownTheme.dark]
-  final ElegantMarkdownTheme? theme;
+  /// - [Brightness.light] → [MarkdownLatexTheme.light]
+  /// - [Brightness.dark]  → [MarkdownLatexTheme.dark]
+  final MarkdownLatexTheme? theme;
 
   /// Called when the user taps a hyperlink in the rendered Markdown.
   ///
@@ -98,7 +76,7 @@ class ElegantMarkdown extends StatelessWidget {
   /// useful for reading-focused layouts (e.g. `maxWidth: 800`).
   final double? maxWidth;
 
-  const ElegantMarkdown({
+  const MarkdownLatex({
     super.key,
     required this.data,
     this.theme,
@@ -112,8 +90,8 @@ class ElegantMarkdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = theme ??
         (Theme.of(context).brightness == Brightness.dark
-            ? ElegantMarkdownTheme.dark()
-            : ElegantMarkdownTheme.light());
+            ? MarkdownLatexTheme.dark()
+            : MarkdownLatexTheme.light());
 
     Widget body = MarkdownBody(
       data: data,
@@ -171,40 +149,60 @@ class ElegantMarkdown extends StatelessWidget {
   // ─── Style Sheet ─────────────────────────────────────────────────────────
 
   MarkdownStyleSheet _buildStyleSheet(
-      BuildContext context, ElegantMarkdownTheme t) {
+      BuildContext context, MarkdownLatexTheme t) {
     final body = TextStyle(
       color: t.onSurface,
       fontSize: 16,
-      height: 1.75,
-      letterSpacing: 0.15,
+      height: 1.8,
+      letterSpacing: 0.1,
+      fontFeatures: const [FontFeature.proportionalFigures()],
     );
 
     return MarkdownStyleSheet(
       // ── 段落
       p: body,
-      pPadding: const EdgeInsets.only(bottom: 6),
+      pPadding: const EdgeInsets.only(bottom: 8),
 
-      // ── 标题（层级分明）
+      // ── 标题（层级分明，Notion 风格间距）
       h1: body.copyWith(
-          fontSize: 32, fontWeight: FontWeight.w700, height: 1.3),
-      h1Padding: const EdgeInsets.fromLTRB(0, 28, 0, 12),
+        fontSize: 30,
+        fontWeight: FontWeight.w700,
+        height: 1.25,
+        letterSpacing: -0.4,
+      ),
+      h1Padding: const EdgeInsets.fromLTRB(0, 32, 0, 14),
       h2: body.copyWith(
-          fontSize: 24, fontWeight: FontWeight.w600, height: 1.35),
-      h2Padding: const EdgeInsets.fromLTRB(0, 22, 0, 10),
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        height: 1.3,
+        letterSpacing: -0.2,
+      ),
+      h2Padding: const EdgeInsets.fromLTRB(0, 26, 0, 10),
       h3: body.copyWith(
-          fontSize: 20, fontWeight: FontWeight.w600, height: 1.4),
-      h3Padding: const EdgeInsets.fromLTRB(0, 18, 0, 8),
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        height: 1.35,
+      ),
+      h3Padding: const EdgeInsets.fromLTRB(0, 20, 0, 8),
       h4: body.copyWith(
-          fontSize: 17, fontWeight: FontWeight.w600, height: 1.45),
-      h4Padding: const EdgeInsets.fromLTRB(0, 14, 0, 6),
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        height: 1.4,
+      ),
+      h4Padding: const EdgeInsets.fromLTRB(0, 16, 0, 6),
       h5: body.copyWith(
-          fontSize: 15, fontWeight: FontWeight.w600, height: 1.5),
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        height: 1.45,
+      ),
       h5Padding: const EdgeInsets.fromLTRB(0, 12, 0, 4),
       h6: body.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: t.onSurface.withValues(alpha: 0.65),
+        color: t.onSurface.withValues(alpha: 0.68),
+        letterSpacing: 0.2,
       ),
+      h6Padding: const EdgeInsets.fromLTRB(0, 10, 0, 4),
 
       // ── 行内样式
       strong: body.copyWith(fontWeight: FontWeight.w700),
@@ -217,17 +215,15 @@ class ElegantMarkdown extends StatelessWidget {
       // ── 行内代码
       code: TextStyle(
         fontFamily: 'monospace',
-        fontSize: 14,
+        fontSize: 13.5,
         color: t.inlineCodeColor,
         backgroundColor: t.codeBackground,
-        height: 1.4,
+        height: 1.45,
+        letterSpacing: 0,
       ),
 
       // ── 代码块容器（由 CodeBlockBuilder 接管）
-      codeblockDecoration: BoxDecoration(
-        color: t.codeBackground,
-        borderRadius: BorderRadius.circular(10),
-      ),
+      codeblockDecoration: const BoxDecoration(),
       codeblockPadding: EdgeInsets.zero,
 
       // ── 链接
@@ -245,11 +241,12 @@ class ElegantMarkdown extends StatelessWidget {
       ),
       blockquoteDecoration: BoxDecoration(
         color: t.blockquoteBackground,
+        borderRadius: BorderRadius.circular(8),
         border: Border(
-          left: BorderSide(color: t.blockquoteBorder, width: 4),
+          left: BorderSide(color: t.blockquoteBorder, width: 3),
         ),
       ),
-      blockquotePadding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      blockquotePadding: const EdgeInsets.fromLTRB(18, 12, 16, 12),
 
       // ── 分割线
       horizontalRuleDecoration: BoxDecoration(
@@ -259,21 +256,37 @@ class ElegantMarkdown extends StatelessWidget {
       ),
 
       // ── 表格
-      tableBorder: TableBorder.all(color: t.tableBorder, width: 1),
-      tableHead: body.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
-      tableBody: body.copyWith(fontSize: 15),
+      tableBorder: TableBorder(
+        top: BorderSide(color: t.tableBorder),
+        bottom: BorderSide(color: t.tableBorder),
+        left: BorderSide(color: t.tableBorder),
+        right: BorderSide(color: t.tableBorder),
+        horizontalInside: BorderSide(color: t.tableBorder.withValues(alpha: 0.7)),
+        verticalInside: BorderSide(color: t.tableBorder.withValues(alpha: 0.7)),
+      ),
+      tableHead: body.copyWith(
+        fontWeight: FontWeight.w600,
+        fontSize: 14.5,
+        color: t.onSurface,
+      ),
+      tableBody: body.copyWith(fontSize: 14.5),
       tableHeadAlign: TextAlign.left,
       tableCellsPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      tableCellsDecoration: BoxDecoration(color: t.tableAltRowBackground),
       tableColumnWidth: const FlexColumnWidth(),
+      tablePadding: const EdgeInsets.only(bottom: 4),
 
       // ── 列表
-      listIndent: 24,
+      listIndent: 26,
       listBullet: body.copyWith(
-          color: t.onSurface.withValues(alpha: 0.6)),
+        color: t.onSurface.withValues(alpha: 0.55),
+        fontSize: 15,
+      ),
+      listBulletPadding: const EdgeInsets.only(right: 8),
 
       // ── 全局间距
-      blockSpacing: 10,
+      blockSpacing: 12,
     );
   }
 
@@ -291,7 +304,7 @@ class ElegantMarkdown extends StatelessWidget {
 
 class _CheckboxIcon extends StatelessWidget {
   final bool checked;
-  final ElegantMarkdownTheme theme;
+  final MarkdownLatexTheme theme;
 
   const _CheckboxIcon({required this.checked, required this.theme});
 
@@ -317,7 +330,7 @@ class _CheckboxIcon extends StatelessWidget {
 class _MarkdownImage extends StatelessWidget {
   final Uri uri;
   final String? alt;
-  final ElegantMarkdownTheme theme;
+  final MarkdownLatexTheme theme;
 
   const _MarkdownImage({
     required this.uri,
@@ -348,7 +361,7 @@ class _MarkdownImage extends StatelessWidget {
 
 class _ImagePlaceholder extends StatelessWidget {
   final String? alt;
-  final ElegantMarkdownTheme theme;
+  final MarkdownLatexTheme theme;
   final bool loading;
 
   const _ImagePlaceholder({

@@ -1,9 +1,9 @@
 /// 完整覆盖所有语法的 Markdown + LaTeX 演示内容
 const String kDemoMarkdown = r'''
-# ElegantMarkdown ✨
+# MarkdownLatex ✨
 
-> 一个支持 **Markdown + LaTeX** 混合渲染的开源 Flutter 组件，
-> 视觉风格接近 Notion / GitHub。
+> **Markdown + LaTeX 混合渲染** Flutter 组件（`markdown_latex`），
+> 视觉风格接近 Notion / GitHub。顶部工具栏可切换 **编辑 / 渲染** 模式。
 
 ---
 
@@ -50,6 +50,7 @@ const String kDemoMarkdown = r'''
 - [x] 支持代码语法高亮
 - [x] 支持 LaTeX 数学公式
 - [x] 实现 Light / Dark 主题
+- [x] 编辑 / 渲染双模式 Demo
 - [ ] 发布到 pub.dev
 - [ ] 完善单元测试
 
@@ -60,12 +61,12 @@ const String kDemoMarkdown = r'''
 ### Dart
 
 ```dart
-class ElegantMarkdown extends StatelessWidget {
+class MarkdownLatex extends StatelessWidget {
   final String data;
-  final ElegantMarkdownTheme? theme;
+  final MarkdownLatexTheme? theme;
   final ValueChanged<String>? onTapLink;
 
-  const ElegantMarkdown({
+  const MarkdownLatex({
     super.key,
     required this.data,
     this.theme,
@@ -74,7 +75,7 @@ class ElegantMarkdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = theme ?? ElegantMarkdownTheme.light();
+    final t = theme ?? MarkdownLatexTheme.light();
     return MarkdownBody(data: data, styleSheet: _buildSheet(t));
   }
 }
@@ -197,5 +198,5 @@ $$
 
 ___
 
-**以上就是 ElegantMarkdown 的完整语法演示！** 🎊
+**以上就是 MarkdownLatex 的完整语法演示！** 🎊
 ''';

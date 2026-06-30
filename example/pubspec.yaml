@@ -1,16 +1,17 @@
-name: elegant_markdown_example
-description: Example application demonstrating elegant_markdown.
+name: markdown_latex_example
+description: Example application demonstrating markdown_latex.
 publish_to: none
 version: 1.0.0
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
-  flutter: ">=3.27.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  elegant_markdown:
+  provider: ^6.1.5
+  markdown_latex:
     path: ../
 
 dev_dependencies:
