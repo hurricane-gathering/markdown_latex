@@ -1,21 +1,21 @@
-/// A high-quality Flutter Markdown + LaTeX renderer.
+/// **markdown_latex** — Flutter Markdown + LaTeX mixed renderer.
 ///
-/// Supports GitHub-Flavored Markdown, inline and block LaTeX math formulas,
-/// syntax-highlighted code blocks, task lists, tables, images, and links —
-/// all with elegant Light / Dark theming.
+/// Render GitHub-Flavored Markdown and LaTeX math in a single, polished view.
+/// Notion / GitHub inspired typography, syntax-highlighted code blocks,
+/// task lists, tables, and a built-in edit/preview editor.
 ///
-/// ## Basic usage
+/// ## Quick start
 ///
 /// ```dart
 /// import 'package:markdown_latex/markdown_latex.dart';
 ///
 /// MarkdownLatex(
-///   data: '# Hello\n\nThis is **bold** and $E=mc^2$.',
+///   data: r'# Hello\n\nEnergy: $E=mc^2$',
 ///   theme: MarkdownLatexTheme.light(),
 /// )
 /// ```
 ///
-/// See [MarkdownLatex] for the full API.
+/// See [MarkdownLatex], [MarkdownLatexTheme], and [MarkdownLatexEditor].
 library;
 
 export 'src/markdown_latex_view.dart';

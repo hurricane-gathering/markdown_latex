@@ -1,18 +1,18 @@
 name: markdown_latex
 description: >-
-  Flutter Markdown + LaTeX mixed renderer. GFM, inline/block math, syntax-highlighted
-  code blocks, task lists, tables, edit/preview editor — Notion / GitHub styling.
-version: 0.1.0
-homepage: https://github.com/hurricane-gathering/elegant_markdown
-repository: https://github.com/hurricane-gathering/elegant_markdown
-issue_tracker: https://github.com/hurricane-gathering/elegant_markdown/issues
+  Polished Flutter Markdown + LaTeX mixed renderer. GFM, inline/block math,
+  syntax-highlighted code, edit/preview editor, Light/Dark themes — Notion style.
+version: 0.1.3
+homepage: https://github.com/hurricane-gathering/markdown_latex
+repository: https://github.com/hurricane-gathering/markdown_latex
+issue_tracker: https://github.com/hurricane-gathering/markdown_latex/issues
 
 topics:
   - markdown
   - latex
   - math
+  - mixed-rendering
   - syntax-highlighting
-  - text-rendering
 
 environment:
   sdk: ">=3.8.0 <4.0.0"

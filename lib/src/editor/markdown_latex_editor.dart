@@ -182,33 +182,35 @@ class _PreviewPane extends StatelessWidget {
         previewEpoch: c.previewEpoch,
       ),
       builder: (context, state, _) {
-        final markdown = MarkdownLatex(
-          // 切换 selectable 时必须重建 MarkdownBody，否则选择状态不会更新。
-          key: ValueKey('preview-${state.previewEpoch}-${state.selectable}'),
-          data: state.data.isEmpty ? '_暂无内容_' : state.data,
-          theme: theme,
-          selectable: state.selectable,
-          onTapLink: onTapLink,
-          maxWidth: maxWidth,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        );
+        if (state.data.isEmpty) {
+          return ColoredBox(
+            color: theme.background,
+            child: Center(
+              child: Text(
+                '暂无内容，请切换到编辑模式输入 Markdown',
+                style: TextStyle(
+                  color: theme.onSurface.withValues(alpha: 0.45),
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          );
+        }
 
         return ColoredBox(
           color: theme.background,
-          child: state.data.isEmpty
-              ? Center(
-                  child: Text(
-                    '暂无内容，请切换到编辑模式输入 Markdown',
-                    style: TextStyle(
-                      color: theme.onSurface.withValues(alpha: 0.45),
-                      fontSize: 14,
-                    ),
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: markdown,
-                ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: MarkdownLatex(
+              key: ValueKey('preview-${state.previewEpoch}-${state.selectable}'),
+              data: state.data,
+              theme: theme,
+              selectable: state.selectable,
+              onTapLink: onTapLink,
+              maxWidth: maxWidth,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            ),
+          ),
         );
       },
     );

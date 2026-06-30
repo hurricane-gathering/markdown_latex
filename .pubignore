@@ -21,5 +21,7 @@ build/
 .DS_Store
 Thumbs.db
 
-# Coverage
-coverage/
+# Demo app entry (not part of the library API)
+lib/main.dart
+lib/src/demo/
+lib/src/demo_content.dart

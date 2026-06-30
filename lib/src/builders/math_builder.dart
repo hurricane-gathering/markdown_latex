@@ -107,7 +107,9 @@ class LatexErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final errorColor = theme?.primary ?? Colors.red;
+    final errorColor = theme?.isDark == true
+        ? Colors.red.shade300
+        : Colors.red.shade700;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(

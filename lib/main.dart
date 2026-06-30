@@ -111,7 +111,7 @@ class _DemoAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            'v0.1.0',
+            'v0.1.3',
             style: TextStyle(
               color: theme.onSurface.withValues(alpha: 0.4),
               fontSize: 12,

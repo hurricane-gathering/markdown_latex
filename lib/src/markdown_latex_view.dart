@@ -94,6 +94,7 @@ class MarkdownLatex extends StatelessWidget {
             : MarkdownLatexTheme.light());
 
     Widget body = MarkdownBody(
+      key: ValueKey('md-body-$selectable'),
       data: data,
       selectable: selectable,
       extensionSet: _buildExtensionSet(),
